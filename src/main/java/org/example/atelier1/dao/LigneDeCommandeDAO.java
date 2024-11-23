@@ -1,20 +1,37 @@
 package org.example.atelier1.dao;
 
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import org.example.atelier1.entities.LigneDeCommande;
 
 import java.util.List;
-
 @ApplicationScoped
 @Transactional
 public class LigneDeCommandeDAO implements LigneDeCommandeRepository {
 
-    @PersistenceContext
-    private EntityManager entityManager;
+    @Inject
+    private EntityManagerFactory entityManagerFactory; // Inject EntityManagerFactory
+
+    private EntityManager entityManager; // Local EntityManager
+
+    @PostConstruct
+    public void init() {
+        this.entityManager = entityManagerFactory.createEntityManager();
+    }
+
+    @PreDestroy
+    public void close() {
+        if (this.entityManager != null && this.entityManager.isOpen()) {
+            this.entityManager.close();
+        }
+    }
 
     @Override
     public LigneDeCommande trouverById(Long id) {
@@ -23,7 +40,9 @@ public class LigneDeCommandeDAO implements LigneDeCommandeRepository {
 
     @Override
     public void ajouterLigneDeCommande(LigneDeCommande ligneDeCommande) {
+        entityManager.getTransaction().begin();
         entityManager.persist(ligneDeCommande);
+        entityManager.getTransaction().commit();
     }
 
     @Override
@@ -35,7 +54,9 @@ public class LigneDeCommandeDAO implements LigneDeCommandeRepository {
     public void supprimerLigneDeCommande(Long id) {
         LigneDeCommande ligneDeCommande = trouverById(id);
         if (ligneDeCommande != null) {
+            entityManager.getTransaction().begin(); // Begin transaction
             entityManager.remove(ligneDeCommande);
+            entityManager.getTransaction().commit(); // Commit transaction
         }
     }
 

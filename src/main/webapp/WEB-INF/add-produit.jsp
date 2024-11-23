@@ -6,8 +6,7 @@
 <body>
 <h1>Add Produit</h1>
 <form action="produits" method="post">
-    <input type="hidden" name="action" value="add"/>
-    <label>ID:</label>
+   
     <input type="text" name="id"/><br/>
     <label>Nom:</label>
     <input type="text" name="nom"/><br/>

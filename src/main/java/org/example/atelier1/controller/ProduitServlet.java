@@ -15,7 +15,7 @@ import java.util.List;
 
 
 
-@WebServlet("/produits")
+@WebServlet(name = "produit", value = "/produit/*")
 public class ProduitServlet extends HttpServlet {
 
     @Inject
@@ -23,15 +23,36 @@ public class ProduitServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String action = req.getParameter("action");
+        String action = req.getPathInfo();
+
+        if (action == null || action.equals("/")) {
+            action = "default";
+        } else {
+            action = action.substring(1);
+        }
 
         try {
-            if ("list".equals(action)) {
-                listProduits(req, resp);
-            } else if ("edit".equals(action)) {
-                editProduit(req, resp);
-            } else {
-                showAddProduitForm(req, resp);
+            switch (action) {
+                case "list":
+                    listProduitsAction(req, resp);
+                    break;
+                case "add":
+                    addProduitAction(req, resp);
+                    break;
+                case "edit":
+                    editProduitAction(req, resp);
+                    break;
+                case "delete":
+                    deleteProduitAction(req, resp);
+                    break;
+                case "save":
+                    saveProduitAction(req, resp);
+                    break;
+                case "update":
+                    updateProduitAction(req, resp);
+                    break;
+                default:
+                    defaultAction(req, resp);
             }
         } catch (Exception e) {
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
@@ -40,84 +61,77 @@ public class ProduitServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String action = req.getParameter("action");
-
-        try {
-            if ("add".equals(action)) {
-                addProduit(req, resp);
-            } else if ("update".equals(action)) {
-                updateProduit(req, resp);
-            } else if ("delete".equals(action)) {
-                deleteProduit(req, resp);
-            } else {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown action");
-            }
-        } catch (Exception e) {
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-        }
+        this.doGet(req, resp);
     }
 
-    private void listProduits(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    private void defaultAction(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        resp.sendRedirect(req.getContextPath() + "/produit/list");
+    }
+
+    private void listProduitsAction(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         List<Produit> produits = produitService.getAllProduits();
         req.setAttribute("produits", produits);
-        req.getRequestDispatcher("/WEB-INF/views/produits.jsp").forward(req, resp);
+        req.getRequestDispatcher("/WEB-INF/produits.jsp").forward(req, resp);
     }
 
-    private void editProduit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String idParam = req.getParameter("id");
+    private void addProduitAction(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        req.getRequestDispatcher("/WEB-INF/add-produit.jsp").forward(req, resp);
+    }
 
+    private void editProduitAction(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String idParam = req.getParameter("id");
         if (idParam != null) {
             Long id = Long.valueOf(idParam);
             Produit produit = produitService.getProduitById(id);
-
-            if (produit != null) {
-                req.setAttribute("produit", produit);
-                req.getRequestDispatcher("/WEB-INF/views/edit-produit.jsp").forward(req, resp);
-            } else {
-                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Produit not found");
-            }
+            req.setAttribute("produit", produit);
+            req.getRequestDispatcher("/WEB-INF/edit-produit.jsp").forward(req, resp);
         } else {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing ID");
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Produit ID is missing");
         }
     }
 
-    private void showAddProduitForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        req.getRequestDispatcher("/WEB-INF/views/add-produit.jsp").forward(req, resp);
+    private void deleteProduitAction(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String idParam = req.getParameter("id");
+        if (idParam != null) {
+            Long id = Long.valueOf(idParam);
+            produitService.deleteProduit(id);
+            resp.sendRedirect(req.getContextPath() + "/produit/list");
+        } else {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Produit ID is missing");
+        }
     }
 
-    private void addProduit(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    private void saveProduitAction(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String nom = req.getParameter("nom");
-        double prix = Double.parseDouble(req.getParameter("prix"));
+        String prixParam = req.getParameter("prix");
 
-        Produit produit = new Produit();
-        produit.setNom(nom);
-        produit.setPrix(prix);
-
-        produitService.saveProduit(produit);
-
-        resp.sendRedirect("produits?action=list");
+        if (nom != null && prixParam != null) {
+            double prix = Double.parseDouble(prixParam);
+            Produit produit = new Produit(null, nom, prix);
+            produitService.saveProduit(produit);
+            resp.sendRedirect(req.getContextPath() + "/produit/list");
+        } else {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid input");
+        }
     }
 
-    private void updateProduit(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        Long id = Long.valueOf(req.getParameter("id"));
-        String nom = req.getParameter("nom");
-        double prix = Double.parseDouble(req.getParameter("prix"));
+    private void updateProduitAction(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String idParam = req.getParameter("id");
+        if (idParam != null) {
+            Long id = Long.valueOf(idParam);
+            String nom = req.getParameter("nom");
+            String prixParam = req.getParameter("prix");
 
-        Produit produit = new Produit();
-        produit.setId(id);
-        produit.setNom(nom);
-        produit.setPrix(prix);
-
-        produitService.updateProduit(produit);
-
-        resp.sendRedirect("produits?action=list");
-    }
-
-    private void deleteProduit(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        Long id = Long.valueOf(req.getParameter("id"));
-
-        produitService.deleteProduit(id);
-
-        resp.sendRedirect("produits?action=list");
+            if (nom != null && prixParam != null) {
+                double prix = Double.parseDouble(prixParam);
+                Produit produit = new Produit(id, nom, prix);
+                produitService.updateProduit(produit);
+                resp.sendRedirect(req.getContextPath() + "/produit/list");
+            } else {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid input");
+            }
+        } else {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Produit ID is missing");
+        }
     }
 }

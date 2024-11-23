@@ -16,8 +16,7 @@ import org.example.atelier1.service.ProduitService;
 
 import java.io.IOException;
 import java.util.List;
-
-@WebServlet("/lignes-de-commande")
+@WebServlet(name = "ligneDeCommande", value = "/ligne-de-commande/*")
 public class LigneDeCommandeServlet extends HttpServlet {
 
     @Inject
@@ -31,15 +30,31 @@ public class LigneDeCommandeServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String action = req.getParameter("action");
+        String action = req.getPathInfo();
+
+        if (action == null || action.equals("/")) {
+            action = "default";
+        } else {
+            action = action.substring(1);
+        }
 
         try {
-            if ("list".equals(action)) {
-                listLignesDeCommande(req, resp);
-            } else if ("edit".equals(action)) {
-                editLigneDeCommande(req, resp);
-            } else {
-                showAddLigneDeCommandeForm(req, resp);
+            switch (action) {
+                case "list":
+                    this.listLignesDeCommandeAction(req, resp);
+                    break;
+                case "add":
+                    this.addLigneDeCommandeFormAction(req, resp);
+                    break;
+                case "edit":
+                    this.editLigneDeCommandeFormAction(req, resp);
+                    break;
+                case "delete":
+                    this.deleteLigneDeCommandeAction(req, resp);
+                    break;
+
+                default:
+                    this.defaultAction(req, resp);
             }
         } catch (Exception e) {
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
@@ -48,30 +63,28 @@ public class LigneDeCommandeServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String action = req.getParameter("action");
-
-        try {
-            if ("add".equals(action)) {
-                addLigneDeCommande(req, resp);
-            } else if ("update".equals(action)) {
-                updateLigneDeCommande(req, resp);
-            } else if ("delete".equals(action)) {
-                deleteLigneDeCommande(req, resp);
-            } else {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown action");
-            }
-        } catch (Exception e) {
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-        }
+        this.doGet(req, resp);
     }
 
-    private void listLignesDeCommande(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    private void defaultAction(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        resp.sendRedirect(req.getContextPath() + "/ligne-de-commande/list");
+    }
+
+    private void listLignesDeCommandeAction(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         List<LigneDeCommande> lignesDeCommande = ligneDeCommandeService.getAllLignesDeCommande();
         req.setAttribute("lignesDeCommande", lignesDeCommande);
         req.getRequestDispatcher("/WEB-INF/views/lignes-de-commande.jsp").forward(req, resp);
     }
 
-    private void editLigneDeCommande(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    private void addLigneDeCommandeFormAction(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        List<Commande> commandes = commandeService.getAllCommandes();
+        List<Produit> produits = produitService.getAllProduits();
+        req.setAttribute("commandes", commandes);
+        req.setAttribute("produits", produits);
+        req.getRequestDispatcher("/WEB-INF/views/add-ligne-de-commande.jsp").forward(req, resp);
+    }
+
+    private void editLigneDeCommandeFormAction(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String idParam = req.getParameter("id");
 
         if (idParam != null) {
@@ -95,71 +108,18 @@ public class LigneDeCommandeServlet extends HttpServlet {
         }
     }
 
-    private void showAddLigneDeCommandeForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        List<Commande> commandes = commandeService.getAllCommandes();
-        List<Produit> produits = produitService.getAllProduits();
-        req.setAttribute("commandes", commandes);
-        req.setAttribute("produits", produits);
-        req.getRequestDispatcher("/WEB-INF/views/add-ligne-de-commande.jsp").forward(req, resp);
-    }
 
-    private void addLigneDeCommande(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        Long commandeId = Long.valueOf(req.getParameter("commandeId"));
-        Long produitId = Long.valueOf(req.getParameter("produitId"));
-        int quantite = Integer.parseInt(req.getParameter("quantite"));
 
-        Commande commande = commandeService.getCommandeById(commandeId);
-        Produit produit = produitService.getProduitById(produitId);
 
-        if (commande == null || produit == null) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid Commande or Produit ID");
-            return;
-        }
 
-        LigneDeCommande ligneDeCommande = new LigneDeCommande();
-        ligneDeCommande.setCommande(commande);
-        ligneDeCommande.setProduit(produit);
-        ligneDeCommande.setQuantite(quantite);
-
-        ligneDeCommandeService.saveLigneDeCommande(ligneDeCommande);
-
-        resp.sendRedirect("lignes-de-commande?action=list");
-    }
-
-    private void updateLigneDeCommande(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        Long id = Long.valueOf(req.getParameter("id"));
-        Long commandeId = Long.valueOf(req.getParameter("commandeId"));
-        Long produitId = Long.valueOf(req.getParameter("produitId"));
-        int quantite = Integer.parseInt(req.getParameter("quantite"));
-
-        Commande commande = commandeService.getCommandeById(commandeId);
-        Produit produit = produitService.getProduitById(produitId);
-
-        if (commande == null || produit == null) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid Commande or Produit ID");
-            return;
-        }
-
-        LigneDeCommande ligneDeCommande = ligneDeCommandeService.getLigneDeCommandeById(id);
-
-        if (ligneDeCommande != null) {
-            ligneDeCommande.setCommande(commande);
-            ligneDeCommande.setProduit(produit);
-            ligneDeCommande.setQuantite(quantite);
-
-            ligneDeCommandeService.updateLigneDeCommande(ligneDeCommande);
-
-            resp.sendRedirect("lignes-de-commande?action=list");
+    private void deleteLigneDeCommandeAction(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        String idParam = req.getParameter("id");
+        if (idParam != null) {
+            Long id = Long.valueOf(idParam);
+            ligneDeCommandeService.deleteLigneDeCommande(id);
+            resp.sendRedirect(req.getContextPath() + "/ligne-de-commande/list");
         } else {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Ligne de commande not found");
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing ID");
         }
-    }
-
-    private void deleteLigneDeCommande(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        Long id = Long.valueOf(req.getParameter("id"));
-
-        ligneDeCommandeService.deleteLigneDeCommande(id);
-
-        resp.sendRedirect("lignes-de-commande?action=list");
     }
 }

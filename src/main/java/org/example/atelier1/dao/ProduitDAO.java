@@ -1,7 +1,11 @@
 package org.example.atelier1.dao;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import org.example.atelier1.entities.Produit;
@@ -14,8 +18,22 @@ import java.util.List;
 @Transactional
 public class ProduitDAO implements ProduitRepository {
 
-    @PersistenceContext
-    private EntityManager entityManager;
+    @Inject
+    private EntityManagerFactory entityManagerFactory; // Inject EntityManagerFactory
+
+    private EntityManager entityManager; // Local EntityManager
+
+    @PostConstruct
+    public void init() {
+        this.entityManager = entityManagerFactory.createEntityManager();
+    }
+
+    @PreDestroy
+    public void close() {
+        if (this.entityManager != null && this.entityManager.isOpen()) {
+            this.entityManager.close();
+        }
+    }
 
     @Override
     public Produit trouverById(Long id) {
@@ -24,7 +42,9 @@ public class ProduitDAO implements ProduitRepository {
 
     @Override
     public void ajouterProduit(Produit produit) {
+        entityManager.getTransaction().begin(); // Begin transaction
         entityManager.persist(produit);
+        entityManager.getTransaction().commit(); // Commit transaction
     }
 
     @Override
@@ -36,7 +56,9 @@ public class ProduitDAO implements ProduitRepository {
     public void supprimerProduit(Long id) {
         Produit produit = trouverById(id);
         if (produit != null) {
+            entityManager.getTransaction().begin(); // Begin transaction
             entityManager.remove(produit);
+            entityManager.getTransaction().commit(); // Commit transaction
         }
     }
 

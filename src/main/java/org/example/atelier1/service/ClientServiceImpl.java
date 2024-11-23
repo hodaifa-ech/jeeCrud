@@ -23,6 +23,7 @@ public class ClientServiceImpl implements ClientService {
     @Override
     public void saveClient(Client client) {
         clientRepository.ajouterClient(client);
+        System.out.println("Client saved successfully");
     }
 
     @Override
