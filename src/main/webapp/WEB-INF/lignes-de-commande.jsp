@@ -5,9 +5,9 @@
     <title>Lignes De Commande</title>
 </head>
 <body>
-<h1>Lignes De Commande</h1>
-<a href="lignes-de-commande?action=add">Add Ligne De Commande</a>
-<table>
+<h1>List of Lignes De Commande</h1>
+
+<table border="1" cellpadding="10" cellspacing="0">
     <thead>
     <tr>
         <th>ID</th>
@@ -21,20 +21,25 @@
     <c:forEach var="ligne" items="${lignesDeCommande}">
         <tr>
             <td>${ligne.id}</td>
-            <td>${ligne.commande.id}</td>
+            <td>Commande ID: ${ligne.commande.id}</td>
             <td>${ligne.produit.nom}</td>
             <td>${ligne.quantite}</td>
             <td>
-                <a href="lignes-de-commande?action=edit&id=${ligne.id}">Edit</a>
-                <form action="lignes-de-commande" method="post" style="display:inline;">
+
+                <form action="${pageContext.request.contextPath}/ligneDeCommande/delete?id=${ligne.id}" method="post" style="display:inline;">
                     <input type="hidden" name="action" value="delete"/>
                     <input type="hidden" name="id" value="${ligne.id}"/>
-                    <button type="submit">Delete</button>
+                    <button type="submit" onclick="return confirm('Are you sure?')">Delete</button>
                 </form>
             </td>
         </tr>
     </c:forEach>
     </tbody>
 </table>
+
+<p>
+    <a href="${pageContext.request.contextPath}/ligneDeCommande/add">Add New Ligne De Commande</a>
+</p>
+
 </body>
 </html>

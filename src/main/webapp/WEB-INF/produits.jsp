@@ -2,12 +2,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Produits</title>
+    <title>Produits List</title>
 </head>
 <body>
-<h1>Produits</h1>
-<a href="produits?action=add">Add Produit</a>
-<table>
+<h1>List of Produits</h1>
+<table border="1">
     <thead>
     <tr>
         <th>ID</th>
@@ -23,16 +22,16 @@
             <td>${produit.nom}</td>
             <td>${produit.prix}</td>
             <td>
-                <a href="produits?action=edit&id=${produit.id}">Edit</a>
-                <form action="produits" method="post" style="display:inline;">
-                    <input type="hidden" name="action" value="delete"/>
-                    <input type="hidden" name="id" value="${produit.id}"/>
-                    <button type="submit">Delete</button>
-                </form>
+                <a href="${pageContext.request.contextPath}/produit/edit?id=${produit.id}">Edit</a> |
+                <a href="${pageContext.request.contextPath}/produit/delete?id=${produit.id}"
+                   onclick="return confirm('Are you sure?')">Delete</a>
             </td>
         </tr>
     </c:forEach>
     </tbody>
 </table>
+<p>
+    <a href="${pageContext.request.contextPath}/produit/add">Add New Produit</a>
+</p>
 </body>
 </html>

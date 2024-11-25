@@ -42,14 +42,18 @@ public class ProduitDAO implements ProduitRepository {
 
     @Override
     public void ajouterProduit(Produit produit) {
-        entityManager.getTransaction().begin(); // Begin transaction
+        entityManager.getTransaction().begin();
+
         entityManager.persist(produit);
-        entityManager.getTransaction().commit(); // Commit transaction
+        entityManager.getTransaction().commit();
+
     }
 
     @Override
     public void modifierProduit(Produit produit) {
+        entityManager.getTransaction().begin();
         entityManager.merge(produit);
+        entityManager.getTransaction().commit();
     }
 
     @Override

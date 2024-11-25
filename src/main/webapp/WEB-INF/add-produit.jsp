@@ -5,13 +5,12 @@
 </head>
 <body>
 <h1>Add Produit</h1>
-<form action="produits" method="post">
-   
-    <input type="text" name="id"/><br/>
+<form action="${pageContext.request.contextPath}/produit/save" method="post">
+
     <label>Nom:</label>
-    <input type="text" name="nom"/><br/>
+    <input type="text" name="nom" required/><br/>
     <label>Prix:</label>
-    <input type="number" step="0.01" name="prix"/><br/>
+    <input type="number" step="0.01" name="prix" required/><br/>
     <button type="submit">Save</button>
 </form>
 </body>

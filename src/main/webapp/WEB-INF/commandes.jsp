@@ -6,8 +6,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-<h1>Commandes</h1>
-<a href="commandes?action=add">Add Commande</a>
+<h1>List of Commandes</h1>
 <table border="1">
     <thead>
     <tr>
@@ -24,25 +23,16 @@
             <td>${commande.dateCommande}</td>
             <td>${commande.client.id}</td>
             <td>
-                <a href="commandes?action=edit&id=${commande.id}">Edit</a>
-                <form action="commandes" method="post" style="display:inline;" class="deleteForm">
-                    <input type="hidden" name="action" value="delete"/>
-                    <input type="hidden" name="id" value="${commande.id}"/>
-                    <button type="submit">Delete</button>
-                </form>
+                <a href="${pageContext.request.contextPath}/commandes/edit?id=${commande.id}">Edit</a> |
+                <a href="${pageContext.request.contextPath}/commandes/delete?id=${commande.id}"
+                   onclick="return confirm('Are you sure?')">Delete</a>
             </td>
         </tr>
     </c:forEach>
     </tbody>
 </table>
-
-<script>
-    // Confirmation dialog for delete actions
-    $(".deleteForm").on("submit", function (e) {
-        if (!confirm("Are you sure you want to delete this Commande?")) {
-            e.preventDefault();
-        }
-    });
-</script>
+<p>
+    <a href="${pageContext.request.contextPath}/commandes/add">Add New Commande</a>
+</p>
 </body>
 </html>

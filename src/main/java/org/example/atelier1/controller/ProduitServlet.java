@@ -104,10 +104,13 @@ public class ProduitServlet extends HttpServlet {
     private void saveProduitAction(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String nom = req.getParameter("nom");
         String prixParam = req.getParameter("prix");
+        System.out.println("Nom: " + nom + ", Prix: " + prixParam);
 
         if (nom != null && prixParam != null) {
             double prix = Double.parseDouble(prixParam);
             Produit produit = new Produit(null, nom, prix);
+
+            System.out.println(produit);
             produitService.saveProduit(produit);
             resp.sendRedirect(req.getContextPath() + "/produit/list");
         } else {

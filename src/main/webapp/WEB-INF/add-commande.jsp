@@ -1,4 +1,7 @@
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
+
+
 <html>
 <head>
     <title>Add Commande</title>
@@ -6,14 +9,19 @@
 </head>
 <body>
 <h1>Add Commande</h1>
-<form action="commandes" method="post" id="addCommandeForm">
-    <input type="hidden" name="action" value="add"/>
-    <label>ID:</label>
-    <input type="text" name="id" required/><br/>
+<form action="${pageContext.request.contextPath}/commandes/save" method="post" id="addCommandeForm">
+
     <label>Date Commande:</label>
     <input type="date" name="dateCommande" required/><br/>
-    <label>Client ID:</label>
-    <input type="text" name="clientId" required/><br/>
+
+    <label>Client:</label>
+    <select name="clientId" required>
+        <option value="">Select a Client</option>
+        <c:forEach var="client" items="${clients}">
+            <option value="${client.id}">${client.nom}</option>
+        </c:forEach>
+    </select><br/>
+
     <button type="submit">Save</button>
 </form>
 

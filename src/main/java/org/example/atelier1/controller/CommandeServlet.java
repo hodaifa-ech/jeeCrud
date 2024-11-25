@@ -22,6 +22,9 @@ public class CommandeServlet extends HttpServlet {
     @Inject
     private CommandeService commandeService;
 
+    @Inject
+    private ClientService clientService;
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String action = req.getPathInfo();
@@ -76,6 +79,9 @@ public class CommandeServlet extends HttpServlet {
     }
 
     private void addCommandeAction(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        List<Client> clients = clientService.getAllClients();
+        System.out.println("Clients: " + clients); // Debug: Check if clients are being fetched
+        req.setAttribute("clients", clients);
         req.getRequestDispatcher("/WEB-INF/add-commande.jsp").forward(req, resp);
     }
 
@@ -84,8 +90,17 @@ public class CommandeServlet extends HttpServlet {
         if (idParam != null) {
             Long id = Long.valueOf(idParam);
             Commande commande = commandeService.getCommandeById(id);
+
             if (commande != null) {
+                // Fetch all clients for the dropdown list
+                List<Client> clients = clientService.getAllClients();
+                System.out.println("Clients: " + clients);
+
+                // Set the commande and clients as request attributes
                 req.setAttribute("commande", commande);
+                req.setAttribute("clients", clients);
+
+                // Forward to the edit form
                 req.getRequestDispatcher("/WEB-INF/edit-commande.jsp").forward(req, resp);
             } else {
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Commande not found");
@@ -94,6 +109,7 @@ public class CommandeServlet extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Commande ID is missing");
         }
     }
+
 
     private void deleteCommandeAction(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String idParam = req.getParameter("id");
