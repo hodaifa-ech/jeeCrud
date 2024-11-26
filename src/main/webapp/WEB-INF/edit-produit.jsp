@@ -2,6 +2,26 @@
 <html>
 <head>
     <title>Edit Produit</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Confirm submission
+            $("form").on("submit", function (e) {
+                if (!confirm("Are you sure you want to update this Produit?")) {
+                    e.preventDefault();
+                }
+            });
+
+            // Highlight invalid inputs dynamically
+            $("input").on("blur", function () {
+                if (!$(this).val()) {
+                    $(this).css("border", "1px solid red");
+                } else {
+                    $(this).css("border", "");
+                }
+            });
+        });
+    </script>
 </head>
 <body>
 <h1>Edit Produit</h1>

@@ -3,6 +3,26 @@
 <html>
 <head>
     <title>Add Ligne De Commande</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Confirm before submission
+            $("form").on("submit", function (e) {
+                if (!confirm("Are you sure you want to add this Ligne De Commande?")) {
+                    e.preventDefault();
+                }
+            });
+
+            // Highlight invalid inputs dynamically
+            $("input, select").on("blur", function () {
+                if (!$(this).val()) {
+                    $(this).css("border", "1px solid red");
+                } else {
+                    $(this).css("border", "");
+                }
+            });
+        });
+    </script>
 </head>
 <body>
 <h1>Add Ligne De Commande</h1>

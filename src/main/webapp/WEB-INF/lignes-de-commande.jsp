@@ -3,6 +3,27 @@
 <html>
 <head>
     <title>Lignes De Commande</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Confirm delete with jQuery
+            $("form button").on("click", function (e) {
+                if (!confirm("Are you sure you want to delete this Ligne De Commande?")) {
+                    e.preventDefault();
+                }
+            });
+
+            // Add hover effect to table rows
+            $("tbody tr").hover(
+                function () {
+                    $(this).css("background-color", "#f9f9f9");
+                },
+                function () {
+                    $(this).css("background-color", "");
+                }
+            );
+        });
+    </script>
 </head>
 <body>
 <h1>List of Lignes De Commande</h1>
@@ -25,11 +46,10 @@
             <td>${ligne.produit.nom}</td>
             <td>${ligne.quantite}</td>
             <td>
-
                 <form action="${pageContext.request.contextPath}/ligneDeCommande/delete?id=${ligne.id}" method="post" style="display:inline;">
                     <input type="hidden" name="action" value="delete"/>
                     <input type="hidden" name="id" value="${ligne.id}"/>
-                    <button type="submit" onclick="return confirm('Are you sure?')">Delete</button>
+                    <button type="submit">Delete</button>
                 </form>
             </td>
         </tr>

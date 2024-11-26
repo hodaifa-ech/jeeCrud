@@ -1,9 +1,19 @@
-<!-- edit-client.jsp -->
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html>
 <head>
     <title>Edit Client</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Highlight the input fields on focus
+            $('input').on('focus', function() {
+                $(this).css('background-color', '#e0f7fa');
+            }).on('blur', function() {
+                $(this).css('background-color', '');
+            });
+        });
+    </script>
 </head>
 <body>
 <h1>Edit Client</h1>

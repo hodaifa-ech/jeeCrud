@@ -1,11 +1,28 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
-
-
 <html>
 <head>
     <title>Add Commande</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Add confirmation before submitting
+            $("#addCommandeForm").on("submit", function (e) {
+                if (!confirm("Are you sure you want to add this Commande?")) {
+                    e.preventDefault();
+                }
+            });
+
+            // Highlight invalid inputs dynamically
+            $("input, select").on("blur", function () {
+                if (!$(this).val()) {
+                    $(this).css("border", "1px solid red");
+                } else {
+                    $(this).css("border", "");
+                }
+            });
+        });
+    </script>
 </head>
 <body>
 <h1>Add Commande</h1>
@@ -24,14 +41,5 @@
 
     <button type="submit">Save</button>
 </form>
-
-<script>
-    // Example: Adding confirmation before submitting
-    $("#addCommandeForm").on("submit", function (e) {
-        if (!confirm("Are you sure you want to add this Commande?")) {
-            e.preventDefault();
-        }
-    });
-</script>
 </body>
 </html>

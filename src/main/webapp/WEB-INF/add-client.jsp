@@ -1,9 +1,21 @@
-<!-- add-client.jsp -->
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html>
 <head>
   <title>Add Client</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      // Form validation example
+      $('form').on('submit', function(e) {
+        const email = $('#email').val();
+        if (!email.includes('@')) {
+          alert('Please enter a valid email.');
+          e.preventDefault(); // Prevent form submission
+        }
+      });
+    });
+  </script>
 </head>
 <body>
 <h1>Add Client</h1>
